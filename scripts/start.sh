@@ -707,7 +707,7 @@ start_tproxy(){
 			ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 		done
 		#繞過IP
-		ip6tables -t nat -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
+		ip6tables -t mangle -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
 		#绕过CN_IPV6
 		[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" ] && \
 		ip6tables -t mangle -A clashv6 -m set --match-set cn_ip6 dst -j RETURN 2>/dev/null
@@ -844,7 +844,7 @@ start_tun(){
 				ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 			done
 			#繞過IP
-			ip6tables -t nat -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
+			ip6tables -t mangle -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" ] && \
 			ip6tables -t mangle -A clashv6 -m set --match-set cn_ip6 dst -j RETURN 2>/dev/null
