@@ -47,7 +47,6 @@ jobs:
         mkdir ShellClash && pushd ShellClash
           cp ../../scripts/* ./
           chmod +x *
-          cp ../Country.mmdb ./
           tar zcvf ../ShellClash.tar.gz *
         popd && rm -fr ./ShellClash
     - name: Commit and push
