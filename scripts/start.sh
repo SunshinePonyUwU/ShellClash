@@ -565,6 +565,8 @@ start_redir(){
 	for ip in $host_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 		iptables -t nat -A clash -d $ip -j RETURN
 	done
+	#繞過IP
+	iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
 	#绕过CN_IP
 	[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 	iptables -t nat -A clash -m set --match-set cn_ip dst -j RETURN 2>/dev/null
@@ -591,6 +593,8 @@ start_redir(){
 		for ip in $reserve_ipv6 $host_ipv6;do #跳过目标保留地址及目标本机网段
 			ip6tables -t nat -A clashv6 -d $ip -j RETURN
 		done
+		#繞過IP
+		ip6tables -t nat -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
 		#绕过CN_IPV6
 		[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" ] && \
 		ip6tables -t nat -A clashv6 -m set --match-set cn_ip6 dst -j RETURN 2>/dev/null
@@ -662,6 +666,8 @@ start_tproxy(){
 	for ip in $host_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 		iptables -t mangle -A clash -d $ip -j RETURN
 	done
+	#繞過IP
+	iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
 	#绕过CN_IP
 	[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 	iptables -t mangle -A clash -m set --match-set cn_ip dst -j RETURN 2>/dev/null
@@ -700,6 +706,8 @@ start_tproxy(){
 		for ip in $host_ipv6 $reserve_ipv6;do #跳过目标保留地址及目标本机网段
 			ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 		done
+		#繞過IP
+		ip6tables -t nat -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
 		#绕过CN_IPV6
 		[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" ] && \
 		ip6tables -t mangle -A clashv6 -m set --match-set cn_ip6 dst -j RETURN 2>/dev/null
@@ -741,6 +749,8 @@ start_output(){
 	for ip in $local_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 		iptables -t nat -A clash_out -d $ip -j RETURN
 	done
+	#繞過IP
+	iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null 2>&1
 	#绕过CN_IP
 	[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 	iptables -t nat -A clash_out -m set --match-set cn_ip dst -j RETURN >/dev/null 2>&1 
@@ -800,6 +810,8 @@ start_tun(){
 		done
 		#防止回环
 		iptables -t mangle -A clash -s 198.18.0.0/16 -j RETURN
+		#繞過IP
+		iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
 		#绕过CN_IP
 		[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 		iptables -t mangle -A clash -m set --match-set cn_ip dst -j RETURN 2>/dev/null
@@ -829,6 +841,8 @@ start_tun(){
 			for ip in $host_ipv6 $reserve_ipv6;do #跳过目标保留地址及目标本机网段
 				ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 			done
+			#繞過IP
+			ip6tables -t nat -A clashv6 -m set --match-set pass_ip6 dst -j RETURN 2>/dev/null
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" ] && \
 			ip6tables -t mangle -A clashv6 -m set --match-set cn_ip6 dst -j RETURN 2>/dev/null
