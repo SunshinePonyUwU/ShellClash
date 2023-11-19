@@ -668,7 +668,7 @@ start_tproxy(){
 		iptables -t mangle -A clash -d $ip -j RETURN
 	done
 	#繞過IP
-	iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
+	iptables -t mangle -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
 	#绕过CN_IP
 	[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 	iptables -t mangle -A clash -m set --match-set cn_ip dst -j RETURN 2>/dev/null
@@ -815,7 +815,7 @@ start_tun(){
 		#防止回环
 		iptables -t mangle -A clash -s 198.18.0.0/16 -j RETURN
 		#繞過IP
-		iptables -t nat -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
+		iptables -t mangle -A clash -m set --match-set pass_ip dst -j RETURN 2>/dev/null
 		#绕过CN_IP
 		[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 		iptables -t mangle -A clash -m set --match-set cn_ip dst -j RETURN 2>/dev/null
