@@ -746,7 +746,7 @@ start_output(){
 	#流量过滤
 	iptables -t nat -N clash_out
 	iptables -t nat -A clash_out -m owner --gid-owner 7890 -j RETURN
-	for ip in $local_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
+	for ip in $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 		iptables -t nat -A clash_out -d $ip -j RETURN
 	done
 	#繞過IP
