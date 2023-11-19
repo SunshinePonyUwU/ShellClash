@@ -482,6 +482,41 @@ EOF
 		rm -f $TMPDIR/${char}.yaml
 	done
 }
+#設置IP繞過
+pass_ip_route(){
+	[ ! -f $bindir/pass_ip.txt ] && {
+		if [ -f $clashdir/pass_ip.txt ];then
+			mv $clashdir/pass_ip.txt $bindir/pass_ip.txt
+		else
+			logger "不存在pass_ip.txt，將創建這個文件" 33
+			echo "" > $clashdir/pass_ip.txt
+		fi
+	}
+	[ -f $bindir/pass_ip.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
+			echo "create pass_ip hash:net family inet hashsize 10240 maxelem 10240" > $TMPDIR/pass_$USER.ipset
+			awk '!/^$/&&!/^#/{printf("add pass_ip %s'" "'\n",$0)}' $bindir/pass_ip.txt >> $TMPDIR/pass_$USER.ipset
+			ipset -! flush pass_ip 2>/dev/null
+			ipset -! restore < $TMPDIR/pass_$USER.ipset
+			rm -rf pass_$USER.ipset
+	}
+}
+pass_ipv6_route(){
+	[ ! -f $bindir/pass_ipv6.txt ] && {
+		if [ -f $clashdir/pass_ipv6.txt ];then
+			mv $clashdir/pass_ipv6.txt $bindir/pass_ipv6.txt
+		else
+			logger "不存在pass_ipv6.txt，將創建這個文件" 33
+			echo "" > $clashdir/pass_ipv6.txt
+		fi
+	}
+	[ -f $bindir/pass_ipv6.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
+			echo "create pass_ip6 hash:net family inet6 hashsize 2048 maxelem 2048" > $TMPDIR/pass6_$USER.ipset
+			awk '!/^$/&&!/^#/{printf("add pass_ip6 %s'" "'\n",$0)}' $bindir/pass_ipv6.txt >> $TMPDIR/pass6_$USER.ipset
+			ipset -! flush pass_ip6 2>/dev/null
+			ipset -! restore < $TMPDIR/pass6_$USER.ipset 
+			rm -rf pass6_$USER.ipset
+	}
+}
 #设置路由规则
 cn_ip_route(){	
 	[ ! -f $bindir/cn_ip.txt ] && {
@@ -1247,7 +1282,9 @@ afstart(){
 		#设置DNS转发
 		start_dns(){
 			[ "$dns_mod" = "redir_host" ] && [ "$cn_ip_route" = "已开启" ] && cn_ip_route
+			[ "$dns_mod" = "redir_host" ] && pass_ip_route
 			[ "$ipv6_redir" = "已开启" ] && [ "$dns_mod" = "redir_host" ] && [ "$cn_ipv6_route" = "已开启" ] && cn_ipv6_route
+			[ "$ipv6_redir" = "已开启" ] && [ "$dns_mod" = "redir_host" ] && pass_ipv6_route
 			if [ "$dns_no" != "已禁用" ];then
 				if [ "$dns_redir" != "已开启" ];then
 					[ -n "$(echo $redir_mod|grep Nft)" ] && start_nft_dns || start_ipt_dns
