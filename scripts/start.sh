@@ -608,9 +608,10 @@ start_redir(){
 				ip6tables -t nat -A clashv6 -m mac --mac-source $mac -j RETURN
 			done
 			#仅代理本机局域网网段流量
-			for ip in $host_ipv6;do
-				ip6tables -t nat -A clashv6 -p tcp -s $ip -j REDIRECT --to-ports $redir_port
-			done
+			# for ip in $host_ipv6;do
+			# 	ip6tables -t nat -A clashv6 -p tcp -s $ip -j REDIRECT --to-ports $redir_port
+			# done
+			ip6tables -t nat -A clashv6 -p tcp -s ::/0 -j REDIRECT --to-ports $redir_port
 		fi
 		ip6tables -t nat -A PREROUTING -p tcp $ports -j clashv6
 	fi
@@ -724,9 +725,10 @@ start_tproxy(){
 					ip6tables -t mangle -A clashv6 -m mac --mac-source $mac -j RETURN
 				done
 				#仅代理本机局域网网段流量
-				for ip in $host_ipv6;do
-					ip6tables -t mangle -A clashv6 -p $1 -s $ip -j TPROXY --on-port $tproxy_port --tproxy-mark $fwmark
-				done
+				# for ip in $host_ipv6;do
+				# 	ip6tables -t mangle -A clashv6 -p $1 -s $ip -j TPROXY --on-port $tproxy_port --tproxy-mark $fwmark
+				# done
+				ip6tables -t mangle -A clashv6 -p $1 -s ::/0 -j TPROXY --on-port $tproxy_port --tproxy-mark $fwmark
 			fi	
 			ip6tables -t mangle -A PREROUTING -p $1 $ports -j clashv6		
 		}
@@ -858,9 +860,10 @@ start_tun(){
 					ip6tables -t mangle -A clashv6 -m mac --mac-source $mac -j RETURN
 				done
 				#仅代理本机局域网网段流量
-				for ip in $host_ipv6;do
-					ip6tables -t mangle -A clashv6 -s $ip -j MARK --set-mark $fwmark
-				done					
+				# for ip in $host_ipv6;do
+				# 	ip6tables -t mangle -A clashv6 -s $ip -j MARK --set-mark $fwmark
+				# done					
+				ip6tables -t mangle -A clashv6 -s ::/0 -j MARK --set-mark $fwmark
 			fi	
 			ip6tables -t mangle -A PREROUTING -p udp $ports -j clashv6		
 			[ "$1" = "all" ] && ip6tables -t mangle -A PREROUTING -p tcp $ports -j clashv6
