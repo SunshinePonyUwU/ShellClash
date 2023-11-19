@@ -755,9 +755,10 @@ start_output(){
 	[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" ] && \
 	iptables -t nat -A clash_out -m set --match-set cn_ip dst -j RETURN >/dev/null 2>&1 
 	#仅允许本机流量
-	for ip in 127.0.0.0/8 $local_ipv4;do 
-		iptables -t nat -A clash_out -p tcp -s $ip -j REDIRECT --to-ports $redir_port
-	done
+	# for ip in 127.0.0.0/8 $local_ipv4;do 
+	# 	iptables -t nat -A clash_out -p tcp -s $ip -j REDIRECT --to-ports $redir_port
+	# done
+	iptables -t nat -A clash_out -p tcp -s 0.0.0.0/0 -j REDIRECT --to-ports $redir_port
 	iptables -t nat -A OUTPUT -p tcp $ports -j clash_out
 	#设置dns转发
 	[ "$dns_no" != "已禁用" ] && {
