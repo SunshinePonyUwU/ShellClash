@@ -1077,6 +1077,8 @@ stop_firewall(){
 		ip6tables -D INPUT -p udp --dport 443 -m comment --comment "ShellClash-QUIC-REJECT" $set_cn_ip -j REJECT 2> /dev/null
 	}
 	#清理ipset规则
+	ipset destroy pass_ip >/dev/null 2>&1
+	ipset destroy pass_ip6 >/dev/null 2>&1
 	ipset destroy cn_ip >/dev/null 2>&1
 	ipset destroy cn_ip6 >/dev/null 2>&1
 	#移除dnsmasq转发规则
