@@ -623,7 +623,7 @@ start_tproxy(){
 	ip rule add fwmark $fwmark table 100
 	ip route add local default dev lo table 100
 	iptables -t mangle -N clash
-	iptables -t mangle -A clash -p udp --dport 53 -j RETURN
+	# iptables -t mangle -A clash -p udp --dport 53 -j RETURN
 	for ip in $host_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 		iptables -t mangle -A clash -d $ip -j RETURN
 	done
@@ -661,7 +661,7 @@ start_tproxy(){
 		ip -6 rule add fwmark $fwmark table 101
 		ip -6 route add local ::/0 dev lo table 101
 		ip6tables -t mangle -N clashv6
-		ip6tables -t mangle -A clashv6 -p udp --dport 53 -j RETURN
+		# ip6tables -t mangle -A clashv6 -p udp --dport 53 -j RETURN
 		for ip in $host_ipv6 $reserve_ipv6;do #跳过目标保留地址及目标本机网段
 			ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 		done
@@ -759,7 +759,7 @@ start_tun(){
 		#获取局域网host地址
 		getlanip
 		iptables -t mangle -N clash
-		iptables -t mangle -A clash -p udp --dport 53 -j RETURN
+		# iptables -t mangle -A clash -p udp --dport 53 -j RETURN
 		for ip in $host_ipv4 $reserve_ipv4;do #跳过目标保留地址及目标本机网段
 			iptables -t mangle -A clash -d $ip -j RETURN
 		done
@@ -790,7 +790,7 @@ start_tun(){
 			ip -6 route add default dev utun table 101
 			ip -6 rule add fwmark $fwmark table 101
 			ip6tables -t mangle -N clashv6
-			ip6tables -t mangle -A clashv6 -p udp --dport 53 -j RETURN
+			# ip6tables -t mangle -A clashv6 -p udp --dport 53 -j RETURN
 			for ip in $host_ipv6 $reserve_ipv6;do #跳过目标保留地址及目标本机网段
 				ip6tables -t mangle -A clashv6 -d $ip -j RETURN
 			done
