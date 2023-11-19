@@ -758,6 +758,7 @@ start_output(){
 	# for ip in 127.0.0.0/8 $local_ipv4;do 
 	# 	iptables -t nat -A clash_out -p tcp -s $ip -j REDIRECT --to-ports $redir_port
 	# done
+	iptables -t nat -A clash_out -p tcp -s 127.0.0.0/8 -j REDIRECT --to-ports $redir_port
 	iptables -t nat -A clash_out -p tcp -s 0.0.0.0/0 -j REDIRECT --to-ports $redir_port
 	iptables -t nat -A OUTPUT -p tcp $ports -j clash_out
 	#设置dns转发
