@@ -15,6 +15,8 @@
 
 中文 | [English](README.md) 
 
+[ShellClash](https://github.com/juewuy/ShellCrash)的第三方修改版本
+
 功能简介：
 --
 
