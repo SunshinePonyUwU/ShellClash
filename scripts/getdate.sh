@@ -624,6 +624,7 @@ EOF
 			setconfig disoverride $disoverride
 			echo -----------------------------------------------	  
 			echo -e "\033[32m设置成功！\033[0m"
+			override
 		fi
 	;;
 	*)
