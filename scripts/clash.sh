@@ -94,7 +94,7 @@ ckstatus(){
 		echo -e "当前内存占用：\033[44m"$VmRSS"\033[0m，已运行：\033[46;30m"$day"\033[44;37m"$time"\033[0m"
 	fi
 	echo -e "TG频道：\033[36;4mhttps://t.me/ShellClash\033[0m"
-	echo -e "修改版：\033https://github.com/SunshinePonyUwU/ShellClash\033[0m"
+	echo -e "修改版：\033[36;4mhttps://github.com/SunshinePonyUwU/ShellClash\033[0m"
 	echo -----------------------------------------------
 	#检查新手引导
 	if [ -z "$userguide" ];then
