@@ -88,7 +88,7 @@ ckstatus(){
 	fi
 	#输出状态
 	echo -----------------------------------------------
-	echo -e "\033[30;46m欢迎使用ShellClash！\033[0m		版本：$versionsh_l"
+	echo -e "\033[30;46m欢迎使用ShellClash！\033[0m		版本：$versionsh_l-SunshinePonyUwU"
 	echo -e "Clash服务"$run"，"$auto""
 	if [ -n "$PID" ];then
 		echo -e "当前内存占用：\033[44m"$VmRSS"\033[0m，已运行：\033[46;30m"$day"\033[44;37m"$time"\033[0m"
