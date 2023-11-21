@@ -88,12 +88,13 @@ ckstatus(){
 	fi
 	#输出状态
 	echo -----------------------------------------------
-	echo -e "\033[30;46m欢迎使用ShellClash！\033[0m		版本：$versionsh_l-SunshinePonyUwU"
+	echo -e "\033[30;46m欢迎使用ShellClash！\033[0m		版本：$versionsh_l"
 	echo -e "Clash服务"$run"，"$auto""
 	if [ -n "$PID" ];then
 		echo -e "当前内存占用：\033[44m"$VmRSS"\033[0m，已运行：\033[46;30m"$day"\033[44;37m"$time"\033[0m"
 	fi
 	echo -e "TG频道：\033[36;4mhttps://t.me/ShellClash\033[0m"
+	echo -e "修改版：\033https://github.com/SunshinePonyUwU/ShellClash\033[0m"
 	echo -----------------------------------------------
 	#检查新手引导
 	if [ -z "$userguide" ];then

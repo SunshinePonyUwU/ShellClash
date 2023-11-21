@@ -900,7 +900,7 @@ start_nft(){
 		#繞過IP
 		[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
 			PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
-			[ -n "$PASS_IP" ] && nft add rule inet shellclash prerouting ip daddr {$PASS_IP} return > /dev/null
+			[ -n "$PASS_IP" ] && nft add rule inet shellclash prerouting ip daddr {$PASS_IP} return
 		}
 		#绕过CN-IP
 		[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
@@ -922,7 +922,7 @@ start_nft(){
 			#繞過IP
 			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
 				PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
-				[ -n "$PASS_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$PASS_IP6} return > /dev/null
+				[ -n "$PASS_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$PASS_IP6} return
 			}
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
