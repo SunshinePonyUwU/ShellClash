@@ -4,7 +4,7 @@
 </h1>
 
 
-  <p align="center">
+<p align="center">
 	<a target="_blank" href="https://github.com/Dreamacro/Clash/releases">
     <img src="https://img.shields.io/github/release/Dreamacro/Clash.svg?style=flat-square&label=Clash">
   </a>
