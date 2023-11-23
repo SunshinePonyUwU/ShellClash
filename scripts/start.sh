@@ -948,7 +948,7 @@ start_nft(){
 		#dns
 		nft add chain inet shellclash dns_out { type nat hook output priority -100 \; }
 		nft add rule inet shellclash dns_out meta skgid {453,7890} return && \
-		nft add rule inet shellclash dns_out udp dport 53 redirect to $dns_port
+		# nft add rule inet shellclash dns_out udp dport 53 redirect to $dns_port
 		#output
 		nft add chain inet shellclash output { type nat hook output priority -100 \; }
 		nft add rule inet shellclash output meta skgid 7890 return && {
@@ -961,7 +961,7 @@ start_nft(){
 			nft add chain inet shellclash docker { type nat hook prerouting priority -100 \; }
 			nft add rule inet shellclash docker ip saddr != {172.16.0.0/12} return #进代理docker网段
 			nft add rule inet shellclash docker ip daddr {$RESERVED_IP} return #过滤保留地址
-			nft add rule inet shellclash docker udp dport 53 redirect to $dns_port
+			# nft add rule inet shellclash docker udp dport 53 redirect to $dns_port
 			nft add rule inet shellclash docker meta l4proto tcp mark set $fwmark redirect to $redir_port
 		}
 	}
