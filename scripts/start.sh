@@ -947,7 +947,7 @@ start_nft(){
 	[ "$local_proxy" = "已开启" ] && [ "$local_type" = "nftables增强模式" ] && {
 		#dns
 		nft add chain inet shellclash dns_out { type nat hook output priority -100 \; }
-		nft add rule inet shellclash dns_out meta skgid {453,7890} return && \
+		nft add rule inet shellclash dns_out meta skgid {453,7890} return
 		# nft add rule inet shellclash dns_out udp dport 53 redirect to $dns_port
 		#output
 		nft add chain inet shellclash output { type nat hook output priority -100 \; }
