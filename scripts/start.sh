@@ -922,12 +922,12 @@ start_nft(){
 			#繞過IP
 			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
 				PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
-				[ -n "$PASS_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$PASS_IP6} return
+				[ -n "$PASS_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$PASS_IP6} return > /dev/null
 			}
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
 				CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
-				[ -n "$CN_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$CN_IP6} return
+				[ -n "$CN_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$CN_IP6} return > /dev/null
 			}
 		else
 			nft add rule inet shellclash prerouting meta nfproto ipv6 return
@@ -947,7 +947,7 @@ start_nft(){
 	[ "$local_proxy" = "已开启" ] && [ "$local_type" = "nftables增强模式" ] && {
 		#dns
 		nft add chain inet shellclash dns_out { type nat hook output priority -100 \; }
-		# nft add rule inet shellclash dns_out meta skgid {453,7890} return && \
+		nft add rule inet shellclash dns_out meta skgid {453,7890} return > /dev/null # && \
 		# nft add rule inet shellclash dns_out udp dport 53 redirect to $dns_port
 		#output
 		nft add chain inet shellclash output { type nat hook output priority -100 \; }
