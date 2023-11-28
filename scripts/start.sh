@@ -911,7 +911,7 @@ start_nft(){
 		[ -n "$PORTS" ] && nft add rule inet shellclash prerouting tcp dport != {$PORTS} ip daddr != {198.18.0.0/16} return
 		#ipv6支持
 		if [ "$ipv6_redir" = "已开启" ];then
-			RESERVED_IP6="$(echo "$reserve_ipv6 $host_ipv6" | sed 's/ /, /g')"
+			RESERVED_IP6="$(echo "$reserve_ipv6" | sed 's/ /, /g')"
 			HOST_IP6="$(echo $host_ipv6 | sed 's/ /, /g')"
 			ip -6 rule add fwmark $fwmark table 101 2> /dev/null
 			ip -6 route add local ::/0 dev lo table 101 2> /dev/null
