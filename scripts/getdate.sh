@@ -866,7 +866,7 @@ setcustcore(){
 		;;
 		2)
 			clashcore=clash.meta
-			custcorelink=https://github.com/juewuy/ShellClash/releases/download/clash.meta.alpha/clash-linux-$cpucore
+			custcorelink=https://github.com/SunshinePonyUwU/ShellClash/releases/download/clash.meta.alpha/clash-linux-$cpucore
 			getcore			
 		;;
 		3)
