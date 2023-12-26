@@ -955,15 +955,33 @@ start_nft(){
 			[ -n "$PORTS" ] && nft add rule inet shellclash output tcp dport != {$PORTS} return
 			nft add rule inet shellclash output ip daddr {$RESERVED_IP} return
 			#繞過IP
-			[ -f $bindir/pass_ip.txt ] && {
+			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
 				PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
 				[ -n "$PASS_IP" ] && nft add rule inet shellclash output ip daddr {$PASS_IP} return
 			}
 			#绕过CN-IP
-			[ "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
+			[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
 				CN_IP=$(awk '{printf "%s, ",$1}' $bindir/cn_ip.txt)
 				[ -n "$CN_IP" ] && nft add rule inet shellclash output ip daddr {$CN_IP} return
 			}
+			#ipv6支持
+			if [ "$ipv6_redir" = "已开启" ];then
+				RESERVED_IP6="$(echo "$reserve_ipv6" | sed 's/ /, /g')"
+				#过滤保留地址及本机地址
+				nft add rule inet shellclash output ip6 daddr {$RESERVED_IP6} return
+				#繞過IP
+				[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
+					PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
+					[ -n "$PASS_IP6" ] && nft add rule inet shellclash output ip6 daddr {$PASS_IP6} return > /dev/null
+				}
+				#绕过CN_IPV6
+				[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
+					CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
+					[ -n "$CN_IP6" ] && nft add rule inet shellclash output ip6 daddr {$CN_IP6} return > /dev/null
+				}
+			else
+				nft add rule inet shellclash output meta nfproto ipv6 return
+			fi
 			nft add rule inet shellclash output meta l4proto tcp mark set $fwmark redirect to $redir_port
 		}
 		#Docker
