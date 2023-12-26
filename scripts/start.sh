@@ -954,6 +954,16 @@ start_nft(){
 		nft add rule inet shellclash output meta skgid 7890 return && {
 			[ -n "$PORTS" ] && nft add rule inet shellclash output tcp dport != {$PORTS} return
 			nft add rule inet shellclash output ip daddr {$RESERVED_IP} return
+			#繞過IP
+			[ -f $bindir/pass_ip.txt ] && {
+				PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
+				[ -n "$PASS_IP" ] && nft add rule inet shellclash output ip daddr {$PASS_IP} return
+			}
+			#绕过CN-IP
+			[ "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
+				CN_IP=$(awk '{printf "%s, ",$1}' $bindir/cn_ip.txt)
+				[ -n "$CN_IP" ] && nft add rule inet shellclash output ip daddr {$CN_IP} return
+			}
 			nft add rule inet shellclash output meta l4proto tcp mark set $fwmark redirect to $redir_port
 		}
 		#Docker
