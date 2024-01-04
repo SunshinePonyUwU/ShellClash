@@ -900,12 +900,18 @@ start_nft(){
 		#繞過IP
 		[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
 			PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
-			[ -n "$PASS_IP" ] && nft add rule inet shellclash prerouting ip daddr {$PASS_IP} return
+			[ -n "$PASS_IP" ] && \
+			nft add set inet shellclash pass_ip { type ipv4_addr\; flags interval\; } && \
+			nft add element inet shellclash pass_ip {$PASS_IP} && \
+			nft add rule inet shellclash prerouting ip daddr @pass_ip return
 		}
 		#绕过CN-IP
 		[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
 			CN_IP=$(awk '{printf "%s, ",$1}' $bindir/cn_ip.txt)
-			[ -n "$CN_IP" ] && nft add rule inet shellclash prerouting ip daddr {$CN_IP} return
+			[ -n "$CN_IP" ] && \
+			nft add set inet shellclash cn_ip { type ipv4_addr\; flags interval\; } && \
+			nft add element inet shellclash cn_ip {$CN_IP} && \
+			nft add rule inet shellclash prerouting ip daddr @cn_ip return
 		}
 		#过滤常用端口
 		[ -n "$PORTS" ] && nft add rule inet shellclash prerouting tcp dport != {$PORTS} ip daddr != {198.18.0.0/16} return
@@ -922,12 +928,18 @@ start_nft(){
 			#繞過IP
 			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
 				PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
-				[ -n "$PASS_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$PASS_IP6} return > /dev/null
+				[ -n "$PASS_IP6" ] && \
+				nft add set inet shellclash pass_ip6 { type ipv6_addr\; flags interval\; } && \
+				nft add element inet shellclash pass_ip6 {$PASS_IP6} && \
+				nft add rule inet shellclash prerouting ip6 daddr @pass_ip6 return
 			}
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
 				CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
-				[ -n "$CN_IP6" ] && nft add rule inet shellclash prerouting ip6 daddr {$CN_IP6} return > /dev/null
+				[ -n "$CN_IP6" ] && \
+				nft add set inet shellclash cn_ip6 { type ipv6_addr\; flags interval\; } && \
+				nft add element inet shellclash cn_ip6 {$PASS_IP6} && \
+				nft add rule inet shellclash prerouting ip6 daddr @cn_ip6 return
 			}
 		else
 			nft add rule inet shellclash prerouting meta nfproto ipv6 return
@@ -956,13 +968,15 @@ start_nft(){
 			nft add rule inet shellclash output ip daddr {$RESERVED_IP} return
 			#繞過IP
 			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
-				PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
-				[ -n "$PASS_IP" ] && nft add rule inet shellclash output ip daddr {$PASS_IP} return
+				# PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
+				# [ -n "$PASS_IP" ] && nft add rule inet shellclash output ip daddr {$PASS_IP} return
+				nft add rule inet shellclash output ip daddr @pass_ip return
 			}
 			#绕过CN-IP
 			[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
-				CN_IP=$(awk '{printf "%s, ",$1}' $bindir/cn_ip.txt)
-				[ -n "$CN_IP" ] && nft add rule inet shellclash output ip daddr {$CN_IP} return
+				# CN_IP=$(awk '{printf "%s, ",$1}' $bindir/cn_ip.txt)
+				# [ -n "$CN_IP" ] && nft add rule inet shellclash output ip daddr {$CN_IP} return
+				nft add rule inet shellclash output ip daddr @cn_ip return
 			}
 			#ipv6支持
 			if [ "$ipv6_redir" = "已开启" ];then
@@ -971,13 +985,15 @@ start_nft(){
 				nft add rule inet shellclash output ip6 daddr {$RESERVED_IP6} return
 				#繞過IP
 				[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
-					PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
-					[ -n "$PASS_IP6" ] && nft add rule inet shellclash output ip6 daddr {$PASS_IP6} return > /dev/null
+					# PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
+					# [ -n "$PASS_IP6" ] && nft add rule inet shellclash output ip6 daddr {$PASS_IP6} return > /dev/null
+					nft add rule inet shellclash output ip6 daddr @pass_ip6 return
 				}
 				#绕过CN_IPV6
 				[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
-					CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
-					[ -n "$CN_IP6" ] && nft add rule inet shellclash output ip6 daddr {$CN_IP6} return > /dev/null
+					# CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
+					# [ -n "$CN_IP6" ] && nft add rule inet shellclash output ip6 daddr {$CN_IP6} return > /dev/null
+					nft add rule inet shellclash output ip6 daddr @cn_ip6 return 
 				}
 			else
 				nft add rule inet shellclash output meta nfproto ipv6 return
