@@ -938,7 +938,7 @@ start_nft(){
 				CN_IP6=$(awk '{printf "%s, ",$1}' $bindir/cn_ipv6.txt)
 				[ -n "$CN_IP6" ] && \
 				nft add set inet shellclash cn_ip6 { type ipv6_addr\; flags interval\; } && \
-				nft add element inet shellclash cn_ip6 {$PASS_IP6} && \
+				nft add element inet shellclash cn_ip6 {$CN_IP6} && \
 				nft add rule inet shellclash prerouting ip6 daddr @cn_ip6 return
 			}
 		else
