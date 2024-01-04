@@ -899,9 +899,9 @@ setcore(){
 	echo -e " (官方高级内核)  \033[33m不支持vless、hy协议\033[0m"
 	echo -e "  说明文档：	\033[36;4mhttps://lancellc.gitbook.io\033[0m"
 	echo
-	echo -e "3 \033[43;30mClash.Meta\033[0m：	\033[32m多功能，支持最全面\033[0m"
-	echo -e " (Meta稳定内核)  \033[33m内存占用较高\033[0m"
-	echo -e "  说明文档：	\033[36;4mhttps://docs.metacubex.one\033[0m"
+	echo -e "3 \033[43;30mMihomo\033[0m：	\033[32m多功能，支持最全面\033[0m"
+	echo -e " (Mihomo稳定内核)  \033[33m内存占用较高\033[0m"
+	echo -e "  说明文档：	\033[36;4mhttps://wiki.metacubex.one\033[0m"
 	echo
 	echo -e "4 \033[32m自定义内核\033[0m：	\033[33m仅限专业用户使用\033[0m"
 	echo
