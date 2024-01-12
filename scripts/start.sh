@@ -897,6 +897,8 @@ start_nft(){
 		nft add rule inet shellclash prerouting ip daddr {$RESERVED_IP} return
 		#仅代理本机局域网网段流量
 		# nft add rule inet shellclash prerouting ip saddr != {$HOST_IP} return
+		#繞過入站
+		nft add rule inet shellclash prerouting fib saddr . iif oif eq 0 return
 		#繞過IP
 		[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
 			PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
