@@ -886,8 +886,6 @@ start_nft(){
 		nft add chain inet shellclash prerouting { type filter hook prerouting priority 0 \; }
 	}
 	[ -n "$(echo $redir_mod|grep Nft)" ] && {
-		#繞過入站
-		nft add rule inet shellclash prerouting fib saddr . iif oif eq 0 return
 		#过滤局域网设备
 		[ -n "$(cat $clashdir/configs/mac)" ] && {
 			MAC=$(awk '{printf "%s, ",$1}' $clashdir/configs/mac)
@@ -946,6 +944,8 @@ start_nft(){
 		else
 			nft add rule inet shellclash prerouting meta nfproto ipv6 return
 		fi
+		#繞過入站
+		nft add rule inet shellclash prerouting fib saddr . iif oif eq 0 return
 		#透明路由
 		[ "$redir_mod" = "Nft基础" ] && nft add rule inet shellclash prerouting meta l4proto tcp mark set $fwmark redirect to $redir_port
 		[ "$redir_mod" = "Nft混合" ] && nft add rule inet shellclash prerouting meta l4proto {tcp, udp} mark set $fwmark tproxy to :$tproxy_port
