@@ -482,6 +482,41 @@ EOF
 		rm -f $TMPDIR/${char}.yaml
 	done
 }
+#設置IP代理
+proxy_ip_route(){
+	[ ! -f $bindir/proxy_ip.txt ] && {
+		if [ -f $clashdir/proxy_ip.txt ];then
+			mv $clashdir/proxy_ip.txt $bindir/proxy_ip.txt
+		else
+			logger "不存在proxy_ip.txt，將創建這個文件" 33
+			echo "1.0.0.1" > $clashdir/proxy_ip.txt
+		fi
+	}
+	[ -f $bindir/proxy_ip.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
+			echo "create proxy_ip hash:net family inet hashsize 10240 maxelem 10240" > $TMPDIR/proxy_$USER.ipset
+			awk '!/^$/&&!/^#/{printf("add proxy_ip %s'" "'\n",$0)}' $bindir/proxy_ip.txt >> $TMPDIR/proxy_$USER.ipset
+			ipset -! flush proxy_ip 2>/dev/null
+			ipset -! restore < $TMPDIR/proxy_$USER.ipset
+			rm -rf proxy_$USER.ipset
+	}
+}
+proxy_ipv6_route(){
+	[ ! -f $bindir/proxy_ipv6.txt ] && {
+		if [ -f $clashdir/proxy_ipv6.txt ];then
+			mv $clashdir/proxy_ipv6.txt $bindir/proxy_ipv6.txt
+		else
+			logger "不存在proxy_ipv6.txt，將創建這個文件" 33
+			echo "2606:4700:4700::1001" > $clashdir/proxy_ipv6.txt
+		fi
+	}
+	[ -f $bindir/proxy_ipv6.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
+			echo "create proxy_ip6 hash:net family inet6 hashsize 2048 maxelem 2048" > $TMPDIR/proxy6_$USER.ipset
+			awk '!/^$/&&!/^#/{printf("add proxy_ip6 %s'" "'\n",$0)}' $bindir/proxy_ipv6.txt >> $TMPDIR/proxy6_$USER.ipset
+			ipset -! flush proxy_ip6 2>/dev/null
+			ipset -! restore < $TMPDIR/proxy6_$USER.ipset 
+			rm -rf proxy6_$USER.ipset
+	}
+}
 #設置IP繞過
 pass_ip_route(){
 	[ ! -f $bindir/pass_ip.txt ] && {
@@ -489,7 +524,7 @@ pass_ip_route(){
 			mv $clashdir/pass_ip.txt $bindir/pass_ip.txt
 		else
 			logger "不存在pass_ip.txt，將創建這個文件" 33
-			echo "" > $clashdir/pass_ip.txt
+			echo "223.6.6.6" > $clashdir/pass_ip.txt
 		fi
 	}
 	[ -f $bindir/pass_ip.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
@@ -506,7 +541,7 @@ pass_ipv6_route(){
 			mv $clashdir/pass_ipv6.txt $bindir/pass_ipv6.txt
 		else
 			logger "不存在pass_ipv6.txt，將創建這個文件" 33
-			echo "" > $clashdir/pass_ipv6.txt
+			echo "2400:3200:baba::1" > $clashdir/pass_ipv6.txt
 		fi
 	}
 	[ -f $bindir/pass_ipv6.txt -a -z "$(echo $redir_mod|grep 'Nft')" ] && {
@@ -897,13 +932,24 @@ start_nft(){
 		nft add rule inet shellclash prerouting ip daddr {$RESERVED_IP} return
 		#仅代理本机局域网网段流量
 		# nft add rule inet shellclash prerouting ip saddr != {$HOST_IP} return
+		#代理IP
+		[ "$dns_mod" = "redir_host" -a -f $bindir/proxy_ip.txt ] && {
+			PROXY_IP=$(awk '{printf "%s, ",$1}' $bindir/proxy_ip.txt)
+			[ -n "$PROXY_IP" ] && \
+			nft add set inet shellclash proxy_ip { type ipv4_addr\; flags interval\; } && \
+			nft add element inet shellclash proxy_ip {$PROXY_IP}
+		}
 		#繞過IP
 		[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ip.txt ] && {
 			PASS_IP=$(awk '{printf "%s, ",$1}' $bindir/pass_ip.txt)
 			[ -n "$PASS_IP" ] && \
 			nft add set inet shellclash pass_ip { type ipv4_addr\; flags interval\; } && \
 			nft add element inet shellclash pass_ip {$PASS_IP} && \
-			nft add rule inet shellclash prerouting ip daddr @pass_ip return
+			if [ -n "$PROXY_IP" ]; then
+				nft add rule inet shellclash prerouting ip daddr @pass_ip ip daddr != @proxy_ip return
+			else
+				nft add rule inet shellclash prerouting ip daddr @pass_ip return
+			fi
 		}
 		#绕过CN-IP
 		[ "$dns_mod" = "redir_host" -a "$cn_ip_route" = "已开启" -a -f $bindir/cn_ip.txt ] && {
@@ -911,7 +957,11 @@ start_nft(){
 			[ -n "$CN_IP" ] && \
 			nft add set inet shellclash cn_ip { type ipv4_addr\; flags interval\; } && \
 			nft add element inet shellclash cn_ip {$CN_IP} && \
-			nft add rule inet shellclash prerouting ip daddr @cn_ip return
+			if [ -n "$PROXY_IP" ]; then
+				nft add rule inet shellclash prerouting ip daddr @cn_ip ip daddr != @proxy_ip return
+			else
+				nft add rule inet shellclash prerouting ip daddr @cn_ip return
+			fi
 		}
 		#过滤常用端口
 		[ -n "$PORTS" ] && nft add rule inet shellclash prerouting tcp dport != {$PORTS} ip daddr != {198.18.0.0/16} return
@@ -925,13 +975,24 @@ start_nft(){
 			nft add rule inet shellclash prerouting ip6 daddr {$RESERVED_IP6} return
 			#仅代理本机局域网网段流量
 			# nft add rule inet shellclash prerouting ip6 saddr != {$HOST_IP6} return
+			#代理IP
+			[ "$dns_mod" = "redir_host" -a -f $bindir/proxy_ipv6.txt ] && {
+				PROXY_IP6=$(awk '{printf "%s, ",$1}' $bindir/proxy_ipv6.txt)
+				[ -n "$PROXY_IP6" ] && \
+				nft add set inet shellclash proxy_ip6 { type ipv6_addr\; flags interval\; } && \
+				nft add element inet shellclash proxy_ip6 {$PROXY_IP6}
+			}
 			#繞過IP
 			[ "$dns_mod" = "redir_host" -a -f $bindir/pass_ipv6.txt ] && {
 				PASS_IP6=$(awk '{printf "%s, ",$1}' $bindir/pass_ipv6.txt)
 				[ -n "$PASS_IP6" ] && \
 				nft add set inet shellclash pass_ip6 { type ipv6_addr\; flags interval\; } && \
 				nft add element inet shellclash pass_ip6 {$PASS_IP6} && \
-				nft add rule inet shellclash prerouting ip6 daddr @pass_ip6 return
+				if [ -n "$PROXY_IP6" ]; then
+					nft add rule inet shellclash prerouting ip6 daddr @pass_ip6 ip6 daddr != @proxy_ip6 return
+				else
+					nft add rule inet shellclash prerouting ip6 daddr @pass_ip6 return
+				fi
 			}
 			#绕过CN_IPV6
 			[ "$dns_mod" = "redir_host" -a "$cn_ipv6_route" = "已开启" -a -f $bindir/cn_ipv6.txt ] && {
@@ -939,7 +1000,11 @@ start_nft(){
 				[ -n "$CN_IP6" ] && \
 				nft add set inet shellclash cn_ip6 { type ipv6_addr\; flags interval\; } && \
 				nft add element inet shellclash cn_ip6 {$CN_IP6} && \
-				nft add rule inet shellclash prerouting ip6 daddr @cn_ip6 return
+				if [ -n "$PROXY_IP6" ]; then
+					nft add rule inet shellclash prerouting ip6 daddr @cn_ip6 ip6 daddr != @proxy_ip6 return
+				else
+					nft add rule inet shellclash prerouting ip6 daddr @cn_ip6 return
+				fi
 			}
 		else
 			nft add rule inet shellclash prerouting meta nfproto ipv6 return
@@ -1358,8 +1423,10 @@ afstart(){
 		start_dns(){
 			[ "$dns_mod" = "redir_host" ] && [ "$cn_ip_route" = "已开启" ] && cn_ip_route
 			[ "$dns_mod" = "redir_host" ] && pass_ip_route
+			[ "$dns_mod" = "redir_host" ] && proxy_ip_route
 			[ "$ipv6_redir" = "已开启" ] && [ "$dns_mod" = "redir_host" ] && [ "$cn_ipv6_route" = "已开启" ] && cn_ipv6_route
 			[ "$ipv6_redir" = "已开启" ] && [ "$dns_mod" = "redir_host" ] && pass_ipv6_route
+			[ "$ipv6_redir" = "已开启" ] && [ "$dns_mod" = "redir_host" ] && proxy_ipv6_route
 			if [ "$dns_no" != "已禁用" ];then
 				if [ "$dns_redir" != "已开启" ];then
 					[ -n "$(echo $redir_mod|grep Nft)" ] && start_nft_dns || start_ipt_dns
